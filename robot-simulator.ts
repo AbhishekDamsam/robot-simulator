@@ -1,4 +1,4 @@
-import { ClockwiseDirection, NORTH, EAST, SOUTH, WEST } from "./constants";
+import { ClockwiseDirection, NORTH, EAST, SOUTH, WEST, Movement } from "./constants";
 import { includes, indexOf, getClassProperty } from "./helpers";
 import { Coordinates, IRobot, voidFn } from "./types";
 
@@ -42,17 +42,17 @@ export default class Robot implements IRobot {
 
     advance(): void {
         const moveCoordinate = 1;
-        let x: number, y: number;
+        let x = this.coordinates[0];
+        let y = this.coordinates[1];
         switch (this.bearing) {
-            case NORTH: x = this.coordinates[0]; y = this.coordinates[1] + moveCoordinate;
+            case NORTH: y = y + moveCoordinate;
                 break;
-            case EAST: x = this.coordinates[0] + moveCoordinate; y = this.coordinates[1];
+            case EAST: x = x + moveCoordinate;
                 break;
-            case SOUTH: x = this.coordinates[0]; y = this.coordinates[1] - moveCoordinate;
+            case SOUTH: y = y - moveCoordinate;
                 break;
-            case WEST: x = this.coordinates[0] - moveCoordinate; y = this.coordinates[1];
+            case WEST: x = x - moveCoordinate;
                 break;
-            default: throw 'Invalid Robot Bearing';
         }
         this.at(x, y);
     }
@@ -60,18 +60,20 @@ export default class Robot implements IRobot {
     instructions(stream: string): string[] {
         const result: string[] = [];
         for (const char of stream) {
-            const methods = Object.getOwnPropertyNames(Robot.prototype);
+            let movement: string;
             switch (char) {
-                case 'L': result.push(methods.filter(methodName => methodName.includes('turnLeft'))[0]);
+                case 'L': movement = Movement.turnLeft;
                     break;
 
-                case 'R': result.push(methods.filter(methodName => methodName.includes('turnRight'))[0]);
+                case 'R': movement = Movement.turnRight;
                     break;
 
-                case 'A': result.push(methods.filter(methodName => methodName.includes('advance'))[0]);
+                case 'A': movement = Movement.advance;
                     break;
+
                 default: throw 'Invalid Instruction'; //Or may be regex /^[lraLRA]$/.test(char)
             }
+            result.push(movement);
         }
         return result;
     }

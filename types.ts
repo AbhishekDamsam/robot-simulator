@@ -1,9 +1,11 @@
+import { Movement } from "./constants";
+
 export type voidFn = () => void;
 
 export type Coordinates = [number, number];
 
 export interface IRobot {
-    turnRight: voidFn;
-    turnLeft: voidFn;
-    advance: voidFn;
+    [Movement.turnRight]: voidFn;
+    [Movement.turnLeft]: voidFn;
+    [Movement.advance]: voidFn;
 }
