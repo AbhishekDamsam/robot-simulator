@@ -33,7 +33,7 @@ direction it is pointing.
 Install assignment dependencies:
 p
 ```bash
-$ yarn install
+$ npm install
 ```
 
 ## Making the test suite pass
@@ -41,7 +41,7 @@ $ yarn install
 Execute the tests with:
 
 ```bash
-$ yarn run test
+$ npm run test
 ```
 
 ### Evaluation Criteria

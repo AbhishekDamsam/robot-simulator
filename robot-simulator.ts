@@ -1,88 +1,77 @@
-import { ClockwiseDirection, NORTH, EAST, SOUTH, WEST, Movement } from "./constants";
-import { includes, indexOf, getClassProperty } from "./helpers";
-import { Coordinates, IRobot, voidFn } from "./types";
+import { ClockwiseDirection, Orientation } from "./constants";
+import { getDirection } from "./helpers";
 
-function nextIndexOfClockwiseDirection(index: number): number {
-    return (index + 1) >= ClockwiseDirection.length ? 0 : index + 1;
-}
 
-function prevIndexOfClockwiseDirection(index: number): number {
-    return index == 0 ? ClockwiseDirection.length - 1 : index - 1;
-}
-
-export default class Robot implements IRobot {
+export default class Robot {
     bearing?: string;
-    coordinates: Coordinates;
+    coordinates: [number, number];
 
     constructor(x = 0, y = 0, bearing?: string) {
         this.bearing = bearing;
         this.coordinates = [x, y];
     }
 
-    orient(direction: string): void | Error {
-        if (!includes(ClockwiseDirection, direction)) {
-            throw 'Invalid Robot Bearing';
+    orient(direction: Orientation): Robot {
+        this.bearing = Orientation[direction];
+        return this;
+    }
+
+    turnRight(): Robot {
+        if(!this.bearing){
+            throw 'Set the Orientation before moving ahead';
         }
-        this.bearing = direction;
+        
+        let currIndex = ClockwiseDirection.findIndex((dir) => this.bearing == dir);
+        this.bearing = getDirection(++currIndex);
+        return this;
     }
 
-    turnRight(): void {
-        const currIndex = indexOf(ClockwiseDirection, this.bearing);
-        this.bearing = ClockwiseDirection[nextIndexOfClockwiseDirection(currIndex)];
+    turnLeft(): Robot {
+        if(!this.bearing){
+            throw 'Set the Orientation before moving ahead';
+        }
+        
+        let currIndex = ClockwiseDirection.findIndex((dir) => this.bearing == dir);
+        this.bearing = getDirection(--currIndex);
+        return this;
     }
 
-    turnLeft(): void {
-        const currIndex = indexOf(ClockwiseDirection, this.bearing);
-        this.bearing = ClockwiseDirection[prevIndexOfClockwiseDirection(currIndex)];
-    }
-
-    at(x: number, y: number): void {
+    at(x: number, y: number): Robot {
         this.coordinates = [x, y];
+        return this;
     }
 
-    advance(): void {
-        const moveCoordinate = 1;
-        let x = this.coordinates[0];
-        let y = this.coordinates[1];
+    advance(): Robot {
+        const moveCoordinateBy1 = 1;
+        let [x, y] = this.coordinates;
         switch (this.bearing) {
-            case NORTH: y = y + moveCoordinate;
+            case Orientation.north: y += moveCoordinateBy1;
                 break;
-            case EAST: x = x + moveCoordinate;
+            case Orientation.east: x += moveCoordinateBy1;
                 break;
-            case SOUTH: y = y - moveCoordinate;
+            case Orientation.south: y -= moveCoordinateBy1;
                 break;
-            case WEST: x = x - moveCoordinate;
+            case Orientation.west: x -= moveCoordinateBy1;
                 break;
         }
         this.at(x, y);
+        return this;
     }
 
-    instructions(stream: string): string[] {
-        const result: string[] = [];
-        for (const char of stream) {
-            let movement: string;
+    evaluateNew(stream: string): Robot {
+        const self = this;
+        [...stream].forEach(char => {
             switch (char) {
-                case 'L': movement = Movement.turnLeft;
+                case 'L': self.turnLeft();
                     break;
 
-                case 'R': movement = Movement.turnRight;
+                case 'R': self.turnRight();
                     break;
 
-                case 'A': movement = Movement.advance;
+                case 'A': self.advance();
                     break;
-
-                default: throw 'Invalid Instruction'; //Or may be regex /^[lraLRA]$/.test(char)
             }
-            result.push(movement);
-        }
-        return result;
-    }
-
-    evaluate(stream: string): void {
-        const instructionList = this.instructions(stream);
-        instructionList.forEach((instruction) => {
-            const move: voidFn = getClassProperty<Robot, keyof IRobot>(this, instruction as keyof IRobot);
-            move.bind(this)();
-        })
+        });
+        return self;
     }
 }
