@@ -1,15 +1,23 @@
 import { Action, ClockwiseDirection, Orientation } from "./constants";
 import { getDirection } from "./helpers";
+import { RobotType, ActionType } from "./types";
 
-type ActionType = keyof typeof Action;
-
-export default class Robot {
+export default class Robot implements RobotType<Robot> {
     bearing?: string;
     coordinates: [number, number];
+    moveCoordinateBy: number;
 
-    constructor(x = 0, y = 0, bearing?: string) {
+    constructor(x = 0, y = 0, bearing?: string, moveCoordinateBy?: number) {
         this.bearing = bearing;
         this.coordinates = [x, y];
+        this.moveCoordinateBy = moveCoordinateBy ?? 1;
+    }
+
+    private getCurrentIndex(){
+        if(!this.bearing){
+            throw 'Set the Orientation before moving ahead';
+        }
+        return ClockwiseDirection.findIndex((dir) => this.bearing == dir);
     }
 
     orient(direction: Orientation): Robot {
@@ -18,26 +26,16 @@ export default class Robot {
     }
 
     [Action.R](): Robot {
-        if(!this.bearing){
-            throw 'Set the Orientation before moving ahead';
-        }
-        
-        let currIndex = ClockwiseDirection.findIndex((dir) => this.bearing == dir);
+        let currIndex = this.getCurrentIndex();
         this.bearing = getDirection(++currIndex);
         return this;
     }
 
     [Action.L](): Robot {
-        if(!this.bearing){
-            throw 'Set the Orientation before moving ahead';
-        }
-        
-        let currIndex = ClockwiseDirection.findIndex((dir) => this.bearing == dir);
+        let currIndex = this.getCurrentIndex();
         this.bearing = getDirection(--currIndex);
         return this;
     }
-
-    
 
     at(x: number, y: number): Robot {
         this.coordinates = [x, y];
@@ -45,7 +43,7 @@ export default class Robot {
     }
 
     [Action.A](): Robot {
-        const moveCoordinateBy1 = 1;
+        const moveCoordinateBy1 = this.moveCoordinateBy;
         let [x, y] = this.coordinates;
         switch (this.bearing) {
             case Orientation.north: y += moveCoordinateBy1;
@@ -62,9 +60,9 @@ export default class Robot {
     }
 }
 
-export function evaluate(stream: string, robot: Robot) {
+export function evaluate(stream: string, robot: RobotType<Robot>) {
     [...stream].forEach(char => {
-        robot[Action[char as ActionType]]();
+        robot = robot[Action[char as ActionType]]?.() ?? robot;
     });
     return {
         coordinates: robot.coordinates,

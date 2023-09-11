@@ -84,7 +84,7 @@ describe('Robot', () => {
   })
 
   it('instruct one robot', () => {
-    const robot = evaluate('RLAALAL', new Robot(-2, 1, 'east'));
+    const robot = evaluate('RLAALALP', new Robot(-2, 1, 'east'));
     expect(robot.coordinates).toEqual([0, 2]);
     expect(robot.bearing!).toEqual('west');
   })
