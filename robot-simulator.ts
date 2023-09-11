@@ -1,6 +1,7 @@
-import { ClockwiseDirection, Orientation } from "./constants";
+import { Action, ClockwiseDirection, Orientation } from "./constants";
 import { getDirection } from "./helpers";
 
+type ActionType = keyof typeof Action;
 
 export default class Robot {
     bearing?: string;
@@ -16,7 +17,7 @@ export default class Robot {
         return this;
     }
 
-    turnRight(): Robot {
+    [Action.R](): Robot {
         if(!this.bearing){
             throw 'Set the Orientation before moving ahead';
         }
@@ -26,7 +27,7 @@ export default class Robot {
         return this;
     }
 
-    turnLeft(): Robot {
+    [Action.L](): Robot {
         if(!this.bearing){
             throw 'Set the Orientation before moving ahead';
         }
@@ -36,12 +37,14 @@ export default class Robot {
         return this;
     }
 
+    
+
     at(x: number, y: number): Robot {
         this.coordinates = [x, y];
         return this;
     }
 
-    advance(): Robot {
+    [Action.A](): Robot {
         const moveCoordinateBy1 = 1;
         let [x, y] = this.coordinates;
         switch (this.bearing) {
@@ -57,21 +60,14 @@ export default class Robot {
         this.at(x, y);
         return this;
     }
+}
 
-    evaluateNew(stream: string): Robot {
-        const self = this;
-        [...stream].forEach(char => {
-            switch (char) {
-                case 'L': self.turnLeft();
-                    break;
-
-                case 'R': self.turnRight();
-                    break;
-
-                case 'A': self.advance();
-                    break;
-            }
-        });
-        return self;
-    }
+export function evaluate(stream: string, robot: Robot) {
+    [...stream].forEach(char => {
+        robot[Action[char as ActionType]]();
+    });
+    return {
+        coordinates: robot.coordinates,
+        bearing: robot.bearing,
+    };
 }

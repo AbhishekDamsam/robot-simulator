@@ -1,5 +1,5 @@
 import { Orientation } from './constants';
-import Robot from './robot-simulator'
+import Robot, { evaluate } from './robot-simulator'
 
 describe('Robot', () => {
   const robot = new Robot();
@@ -83,24 +83,22 @@ describe('Robot', () => {
     expect(coordinates).toEqual([-1, 0]);
   })
 
-  it('instruct robot', () => {
-    const robotI = new Robot(-2, 1, 'east').evaluateNew('RLAALAL');
-    expect(robotI.coordinates).toEqual([0, 2]);
-    expect(robotI.bearing!).toEqual('west');
+  it('instruct one robot', () => {
+    const robot = evaluate('RLAALAL', new Robot(-2, 1, 'east'));
+    expect(robot.coordinates).toEqual([0, 2]);
+    expect(robot.bearing!).toEqual('west');
   })
 
-  it('instruct many robots', () => {
-    const [robot1, robot2, robot3] = [new Robot(0, 0, 'north'), new Robot(2, -7, 'east'), new Robot(8, 4, 'south')];
-    
-    robot1.evaluateNew('LAAARALA');
+  it('instruct multiple robots', () => {
+    const robot1 = evaluate('LAAARALA', new Robot(0, 0, 'north'));
     expect(robot1.coordinates).toEqual([-4, 1]);
     expect(robot1.bearing).toEqual('west');
 
-    robot2.evaluateNew('RRAAAAALA');
+    const robot2 = evaluate('RRAAAAALA', new Robot(2, -7, 'east'));
     expect(robot2.coordinates).toEqual([-3, -8]);
     expect(robot2.bearing).toEqual('south');
 
-    robot3.evaluateNew('LAAARRRALLLL');
+    const robot3 = evaluate('LAAARRRALLLL', new Robot(8, 4, 'south'));
     expect(robot3.coordinates).toEqual([11, 5]);
     expect(robot3.bearing).toEqual('north');
   })

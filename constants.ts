@@ -7,3 +7,9 @@ export enum Orientation {
 }
 
 export const ClockwiseDirection = [...Object.values(Orientation)] as const;
+
+export enum Action {
+    L = "turnLeft",
+    R = "turnRight",
+    A = "advance"
+}
