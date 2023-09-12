@@ -1,6 +1,6 @@
 import { Action } from "./constants";
 
-export type ActionType = keyof typeof Action;
+export type Enum = { [s: number]: string };
 
 export interface RobotType<Type> {
     bearing?: string;

@@ -1,6 +1,6 @@
 import { Action, ClockwiseDirection, Orientation } from "./constants";
-import { getDirection } from "./helpers";
-import { RobotType, ActionType } from "./types";
+import { getDirection, isEnumKey } from "./helpers";
+import { RobotType } from "./types";
 
 export default class Robot implements RobotType<Robot> {
     bearing?: string;
@@ -62,7 +62,9 @@ export default class Robot implements RobotType<Robot> {
 
 export function evaluate(stream: string, robot: RobotType<Robot>) {
     [...stream].forEach(char => {
-        robot = robot[Action[char as ActionType]]?.() ?? robot;
+        if(isEnumKey(Action, char)){
+            robot[Action[char]]();
+        }
     });
     return {
         coordinates: robot.coordinates,
