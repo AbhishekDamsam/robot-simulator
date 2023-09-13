@@ -5,19 +5,19 @@ import { RobotType } from "./types";
 export default class Robot implements RobotType<Robot> {
     bearing?: string;
     coordinates: [number, number];
-    moveCoordinateBy: number;
+    readonly moveCoordinateBy: number;
 
     constructor(x = 0, y = 0, bearing?: string, moveCoordinateBy?: number) {
         this.bearing = bearing;
         this.coordinates = [x, y];
-        this.moveCoordinateBy = moveCoordinateBy ?? 1;
+        this.moveCoordinateBy = moveCoordinateBy ?? 1; // To stop reassignment in class methods
     }
 
     private getCurrentIndex(){
         if(!this.bearing){
             throw 'Set the Orientation before moving ahead';
         }
-        return ClockwiseDirection.findIndex((dir) => this.bearing == dir);
+        return ClockwiseDirection.findIndex((dir) => dir == this.bearing);
     }
 
     orient(direction: Orientation): Robot {
@@ -26,14 +26,12 @@ export default class Robot implements RobotType<Robot> {
     }
 
     [Action.R](): Robot {
-        let currIndex = this.getCurrentIndex();
-        this.bearing = getDirection(++currIndex);
+        this.bearing = getDirection(this.getCurrentIndex() + 1);
         return this;
     }
 
     [Action.L](): Robot {
-        let currIndex = this.getCurrentIndex();
-        this.bearing = getDirection(--currIndex);
+        this.bearing = getDirection(this.getCurrentIndex() - 1);
         return this;
     }
 
