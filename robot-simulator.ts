@@ -1,7 +1,7 @@
 import { Action, ClockwiseDirection, Orientation } from "./constants";
 import { getDirection, isEnumKey } from "./helpers";
 import { RobotType } from "./types";
-
+//https://www.youtube.com/watch?v=IPcAeo1ZKEk&list=PLYvdvJlnTOjF6aJsWWAt7kZRJvzw-en8B&index=46
 export default class Robot implements RobotType<Robot> {
     bearing?: string;
     coordinates: [number, number];
@@ -20,6 +20,7 @@ export default class Robot implements RobotType<Robot> {
         return ClockwiseDirection.findIndex((dir) => dir == this.bearing);
     }
 
+    // shouldn't pass enum in parameters, it can accept incorrect enum Key value ex direction="south bad value"
     orient(direction: Orientation): Robot {
         this.bearing = Orientation[direction];
         return this;
